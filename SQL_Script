@@ -1,0 +1,92 @@
+
+CREATE TABLE Professor (
+    ProfessorID INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(50),
+    Sobrenome VARCHAR(80),
+    Email VARCHAR(100)
+);
+
+CREATE TABLE Curso (
+    CursoID INT PRIMARY KEY AUTO_INCREMENT,
+    NomeCurso VARCHAR(100),
+    ProfessorID INT,
+    FOREIGN KEY (ProfessorID) REFERENCES Professor(ProfessorID)
+);
+
+CREATE TABLE Aluno (
+    AlunoID INT PRIMARY KEY AUTO_INCREMENT,
+    Nome VARCHAR(50),
+    Sobrenome VARCHAR(80),
+    Email VARCHAR(100),
+    CursoID INT,
+    FOREIGN KEY (CursoID) REFERENCES Curso(CursoID)
+);
+
+-- Stored Procedure para inserir o curso --
+DELIMITER //
+
+CREATE PROCEDURE InserirCurso(
+    IN p_nome_curso VARCHAR(100),
+    IN p_nome_professor VARCHAR(50),
+    IN p_sobrenome_professor VARCHAR(80)
+)
+BEGIN
+    DECLARE professor_id INT;
+
+    -- Verificando se o professor já existe --
+    SELECT ProfessorID INTO professor_id
+    FROM Professor
+    WHERE Nome = p_nome_professor AND Sobrenome = p_sobrenome_professor;
+
+    -- Se o professor não existir, insira--
+    IF professor_id IS NULL THEN
+        INSERT INTO Professor(Nome, Sobrenome)
+        VALUES (p_nome_professor, p_sobrenome_professor);
+        SET professor_id = LAST_INSERT_ID();
+    END IF;
+
+    -- Inserindo o curso --
+    INSERT INTO Curso(NomeCurso, ProfessorID)
+    VALUES (p_nome_curso, professor_id);
+END //
+
+DELIMITER ;
+
+-- Stored Procedure para inserção de aluno com email único--
+CREATE PROCEDURE InserirAluno(
+    IN p_nome VARCHAR(50),
+    IN p_sobrenome VARCHAR(50),
+    IN p_curso_id INT
+)
+BEGIN
+    DECLARE nome_completo VARCHAR(100);
+    DECLARE novo_email VARCHAR(100);
+    DECLARE contador INT;
+
+    -- Concatenando nome e sobrenome --
+    SET nome_completo = CONCAT(p_nome, ' ', p_sobrenome);
+
+    -- Verificando se o nome já existe na tabela de alunos--
+    SELECT COUNT(*) INTO contador
+    FROM Aluno
+    WHERE Nome = p_nome AND Sobrenome = p_sobrenome;
+
+    -- Gerando o email com o número sequencial se necessário--
+    IF contador > 0 THEN
+        SET novo_email = CONCAT(REPLACE(nome_completo, ' ', '.'), contador + 1, '@dominio.com');
+    ELSE
+        SET novo_email = CONCAT(REPLACE(nome_completo, ' ', '.'), '@dominio.com');
+    END IF;
+
+    -- Inserindo o aluno na tabela --
+    INSERT INTO Aluno(Nome, Sobrenome, Email, CursoID)
+    VALUES (p_nome, p_sobrenome, novo_email, p_curso_id);
+END //
+
+DELIMITER ;
+
+-- Stored Procedure para seleção de cursos--
+CREATE PROCEDURE SelecionarCursos()
+BEGIN
+    SELECT * FROM Curso;
+END;
