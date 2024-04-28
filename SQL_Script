@@ -21,10 +21,30 @@ CREATE TABLE Aluno (
     CursoID INT,
     FOREIGN KEY (CursoID) REFERENCES Curso(CursoID)
 );
+-- Inserindo dados na tabela Professor --
+INSERT INTO Professor (Nome, Sobrenome, Email) VALUES ('Severus', 'Snape', 'severus.snape@hogwarts.com');
+INSERT INTO Professor (Nome, Sobrenome, Email) VALUES ('Minerva', 'McGonagall', 'minerva.mcgonagall@hogwarts.com');
+INSERT INTO Professor (Nome, Sobrenome, Email) VALUES ('Remus', 'Lupin', 'remus.lupin@hogwarts.com');
+INSERT INTO Professor (Nome, Sobrenome, Email) VALUES ('Pomona', 'Sprout', 'pomona.sprout@hogwarts.com');
+INSERT INTO Professor (Nome, Sobrenome, Email) VALUES ('Filius', 'Flitwick', 'filius.flitwick@hogwarts.com');
 
--- Stored Procedure para inserir o curso --
+-- Inserindo dados na tabela Curso --
+INSERT INTO Curso (NomeCurso, ProfessorID) VALUES ('Poções', 1); 
+INSERT INTO Curso (NomeCurso, ProfessorID) VALUES ('Transfiguração', 2); 
+INSERT INTO Curso (NomeCurso, ProfessorID) VALUES ('Defesa Contra as Artes das Trevas', 3);
+INSERT INTO Curso (NomeCurso, ProfessorID) VALUES ('Herbologia', 4); 
+INSERT INTO Curso (NomeCurso, ProfessorID) VALUES ('Feitiços', 5); -
+
+-- Inserindo dados na tabela Aluno --
+INSERT INTO Aluno (Nome, Sobrenome, Email, CursoID) VALUES ('Harry', 'Potter', 'harry.potter@dominio.com', 1);
+INSERT INTO Aluno (Nome, Sobrenome, Email, CursoID) VALUES ('Hermione', 'Granger', 'hermione.granger@dominio.com', 2);
+INSERT INTO Aluno (Nome, Sobrenome, Email, CursoID) VALUES ('Ron', 'Weasley', 'ron.weasley@dominio.com', 3);
+INSERT INTO Aluno (Nome, Sobrenome, Email, CursoID) VALUES ('Neville', 'Longbottom', 'neville.longbottom@dominio.com', 4); 
+INSERT INTO Aluno (Nome, Sobrenome, Email, CursoID) VALUES ('Luna', 'Lovegood', 'luna.lovegood@dominio.com', 5); 
+
 DELIMITER //
 
+-- Stored Procedure para inserir o curso --
 CREATE PROCEDURE InserirCurso(
     IN p_nome_curso VARCHAR(100),
     IN p_nome_professor VARCHAR(50),
@@ -38,21 +58,21 @@ BEGIN
     FROM Professor
     WHERE Nome = p_nome_professor AND Sobrenome = p_sobrenome_professor;
 
-    -- Se o professor não existir, insira--
+    -- Se o professor não existir, inserir--
     IF professor_id IS NULL THEN
         INSERT INTO Professor(Nome, Sobrenome)
         VALUES (p_nome_professor, p_sobrenome_professor);
         SET professor_id = LAST_INSERT_ID();
     END IF;
 
-    -- Inserindo o curso --
+    -- Inserindo o curso
     INSERT INTO Curso(NomeCurso, ProfessorID)
     VALUES (p_nome_curso, professor_id);
 END //
 
 DELIMITER ;
 
--- Stored Procedure para inserção de aluno com email único--
+-- Stored Procedure para inserção de aluno com email único --
 CREATE PROCEDURE InserirAluno(
     IN p_nome VARCHAR(50),
     IN p_sobrenome VARCHAR(50),
@@ -63,29 +83,29 @@ BEGIN
     DECLARE novo_email VARCHAR(100);
     DECLARE contador INT;
 
-    -- Concatenando nome e sobrenome --
+    -- Concatenando nome e sobrenome
     SET nome_completo = CONCAT(p_nome, ' ', p_sobrenome);
 
-    -- Verificando se o nome já existe na tabela de alunos--
+    -- Verificando se o nome já existe na tabela de alunos --
     SELECT COUNT(*) INTO contador
     FROM Aluno
     WHERE Nome = p_nome AND Sobrenome = p_sobrenome;
 
-    -- Gerando o email com o número sequencial se necessário--
+    -- Gerando o email com o número sequencial se necessário --
     IF contador > 0 THEN
         SET novo_email = CONCAT(REPLACE(nome_completo, ' ', '.'), contador + 1, '@dominio.com');
     ELSE
         SET novo_email = CONCAT(REPLACE(nome_completo, ' ', '.'), '@dominio.com');
     END IF;
 
-    -- Inserindo o aluno na tabela --
+    -- Inserindo o aluno na tabela--
     INSERT INTO Aluno(Nome, Sobrenome, Email, CursoID)
     VALUES (p_nome, p_sobrenome, novo_email, p_curso_id);
 END //
 
 DELIMITER ;
 
--- Stored Procedure para seleção de cursos--
+-- Stored Procedure para seleção de cursos --
 CREATE PROCEDURE SelecionarCursos()
 BEGIN
     SELECT * FROM Curso;
