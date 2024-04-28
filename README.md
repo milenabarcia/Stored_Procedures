@@ -20,3 +20,8 @@ Envie a atividade em um repositório remoto, no mesmo crie um readme.md utilizan
 Poste somente o link de acesso ao repositório nesta atividade;
 
 No readme insira a imagem do modelo lógico criado.
+
+
+MODELO
+
+![Screenshot of a comment on a GitHub issue showing an image, added in the Markdown, of an Octocat smiling and raising a tentacle.](https://github.com/milenabarcia/Stored_Procedures/blob/main/Stored_Procedures1.jpg?raw=true)
