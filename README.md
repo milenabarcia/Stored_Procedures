@@ -1,2 +1,2 @@
-# Stored_Procedures
+# Stored Procedures
 Atividade individual - Tema: Stored Procedures, Segundo Semestre ADS, FACENS
